@@ -6,6 +6,7 @@ const channelId = "-1001417529812";
 const endpointBinance = "https://api.binance.com";
 // bot.sendMessage(channelId,"Hello");
 var MACD = require('technicalindicators').MACD;
+var RSI = require('technicalindicators').RSI;
 const request = require('request');
 
 function verifyMacd(frequency){
@@ -40,6 +41,12 @@ function verifyMacd(frequency){
                     SimpleMASignal: false
                 }
                 var macd = MACD.calculate(macdInput);
+                
+                var inputRSI = {
+                    values: macdValues,
+                    period: 14
+                };
+                var rsi = RSI.calculate(inputRSI);
 
                 var lastCandle = macd[macd.length - 1];
                 var preLastCandle = macd[macd.length - 2];
@@ -51,14 +58,14 @@ function verifyMacd(frequency){
                 }else{
                     if (preLastCandle.histogram < 0) {
                         if (lastCandle.histogram > 0) {
-                            console.log("Croisement MACD bull en " + frequency + " sur " + symbol);
-                            messagesToSend += "Croisement MACD bull en " + frequency + " sur " + symbol + "\n";
+                            console.log("Signal bull [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] +"]");
+                            messagesToSend += "Signal bull [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                             hasCroisement = true;
                         }
                     } else {
                         if (lastCandle.histogram < 0) {
-                            console.log("Croisement MACD bear en " + frequency + " sur " + symbol);
-                            messagesToSend += "Croisement MACD bear en " + frequency + " sur " + symbol + "\n";
+                            console.log("Signal bull [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
+                            messagesToSend += "Signal bear [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                             hasCroisement = true;
                         }
                     }
