@@ -1,7 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api');
-const token = '1678486946:AAGB0oI-JPaEQrlcyA1km7IpFSRHtIqWQhM';
+const options = require('./token.json');
+const token = options.token;
 const bot = new TelegramBot(token, { polling: true });
-const channelId = "-1001417529812";
+const channelId = options.channelId;
 
 const endpointBinance = "https://api.binance.com";
 // bot.sendMessage(channelId,"Hello");
@@ -41,7 +42,7 @@ function verifyMacd(frequency){
                     SimpleMASignal: false
                 }
                 var macd = MACD.calculate(macdInput);
-                
+
                 var inputRSI = {
                     values: macdValues,
                     period: 14
@@ -82,21 +83,21 @@ function verifyMacd(frequency){
 verifyMacd("1d");
 
 // Settimeout pour 30mn
-setTimeout(function () {
+setInterval(function () {
     verifyMacd("30m");
 }, (30 * 60 * 1000));
 
 // Settimeout pour 1h
-setTimeout(function () {
+setInterval(function () {
     verifyMacd("1h");
 }, (60 * 60 * 1000));
 
 // Settimeout pour 4h
-setTimeout(function () {
+setInterval(function () {
     verifyMacd("4h");
 }, (4 * 60 * 60 * 1000));
 
 // Settimeout pour 1d
-setTimeout(function () {
+setInterval(function () {
     verifyMacd("1d");
 }, (60 * 60 * 1000));
