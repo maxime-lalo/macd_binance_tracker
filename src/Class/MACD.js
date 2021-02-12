@@ -76,14 +76,14 @@ let MACD = class {
                     } else {
                         if (preLastCandle.histogram < 0) {
                             if (lastCandle.histogram > 0) {
-                                console.log("Signal bull [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
-                                messagesToSend += "Signal bull [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                                console.log("Signal 📈 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
+                                messagesToSend += "Signal 📈 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                                 hasCroisement = true;
                             }
                         } else {
                             if (lastCandle.histogram < 0) {
-                                console.log("Signal bull [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
-                                messagesToSend += "Signal bear [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                                console.log("Signal 📉 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
+                                messagesToSend += "Signal 📉 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                                 hasCroisement = true;
                             }
                         }
