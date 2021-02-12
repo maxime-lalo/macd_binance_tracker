@@ -1,24 +1,15 @@
 let Endpoints = require('./AbsctractEnpoints')
+let Message = require('./Message')
 
 let MACD = class extends Endpoints {
 
-    TelegramBot;
-    options;
-    token;
-    bot;
-    channelId;
+
     MACD;
     RSI;
     request;
 
     constructor() {
         super();
-        this.TelegramBot = require('node-telegram-bot-api');
-        this.options = require('../../token.json');
-        this.token = this.options.token;
-        this.bot = new this.TelegramBot(this.token, {polling: true});
-        this.channelId = this.options.channelId;
-
         this.MACD = require('technicalindicators').MACD;
         this.RSI = require('technicalindicators').RSI;
         this.request = require('request');
@@ -38,20 +29,24 @@ let MACD = class extends Endpoints {
 
             console.log("Vérification de " + symbols.length + " symboles");
             let counterVerified = 0;
-            let messagesToSend = `🏛️ Vérification pour : ${frequency} 🏛️ \n\n `;
+            let messagesToSend = [ [`🏛️ Vérification pour : ${frequency} 🏛️ \n\n `, null] ];
             symbols.forEach((symbol) => {
                 this.request(this.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=" + frequency + "&limit=100", {json: true}, (err, res, body) => {
                     counterVerified++;
                     let {rsi, lastCandle, preLastCandle} = this.GetMacdValues(body);
 
-                    messagesToSend += this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
-
+                    let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
+                    if(result != null){
+                        messagesToSend.push(result);
+                    }
                     if (counterVerified === symbols.length) {
-                        if (messagesToSend == ""){
+                       new Message().sendMessage(messagesToSend)
+                      /*  if (messagesToSend == ""){
                             this.bot.sendMessage(this.channelId, "Pas de croisement répéré en " + frequency);
                         }else{
                             this.bot.sendMessage(this.channelId, messagesToSend);
-                        }
+                        }*/
+
                     }
                 });
             });
@@ -97,22 +92,24 @@ let MACD = class extends Endpoints {
     getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi) {
         if (preLastCandle === undefined) {
             console.log("Ignore " + symbol + " pas assez d'histo");
-            return "";
+            return null;
         } else {
             if (preLastCandle.histogram < 0) {
                 if (lastCandle.histogram > 0) {
                     console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return "Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                    return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n", "up"];
                 }
             } else {
                 if (lastCandle.histogram < 0) {
                     console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return "Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                    return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n", "down"];
                 }
             }
         }
-        return "";
+        return null;
     }
+
+
 
 
 }

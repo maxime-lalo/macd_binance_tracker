@@ -1,5 +1,5 @@
 let MACD = require('./Class/MACD');
-
+new MACD().verify('1h');
 // Settimeout pour 1h
 setInterval(function () {
     new MACD().verify('1h');
@@ -13,5 +13,5 @@ setInterval(function () {
 // Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
 setInterval(function () {
     new MACD().verify('1d');
-}, (3 * 60 * 60 * 1000));
+}, (30 * 60 * 1000));
 
