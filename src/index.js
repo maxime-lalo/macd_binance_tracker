@@ -15,5 +15,5 @@ setInterval(function () {
 // Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
 setInterval(function () {
     new MACD().verify('1d');
-}, (30 * 60 * 1000));
+}, (3 * 60 * 60 * 1000));
 

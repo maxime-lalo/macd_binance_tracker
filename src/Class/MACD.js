@@ -38,7 +38,7 @@ let MACD = class extends Endpoints {
 
             console.log("Vérification de " + symbols.length + " symboles");
             let counterVerified = 0;
-            let messagesToSend = "";
+            let messagesToSend = `🏛️ Vérification pour : ${frequency} 🏛️ \n\n `;
             symbols.forEach((symbol) => {
                 this.request(this.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=" + frequency + "&limit=100", {json: true}, (err, res, body) => {
                     counterVerified++;
