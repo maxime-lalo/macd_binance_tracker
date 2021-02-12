@@ -14,15 +14,15 @@ let Message = class {
         this.channelId = this.options.channelId;
     }
 
-    sendMessage(array){
+    sendMessage(array) {
         this.send(this.sortMessage(array))
     }
 
-    sortMessage(array){
-        let intro= array[0][0] ;
+    sortMessage(array) {
+        let intro = array[0][0];
         let up = [];
         let down = [];
-        Array.prototype.forEach.call(array, data =>{
+        Array.prototype.forEach.call(array, data => {
             switch (data[1]) {
                 case 'up':
                     up.push(data[0])
@@ -36,14 +36,23 @@ let Message = class {
         return [intro].concat(up)
     }
 
-    send(array){
+    /**
+     * @param {*[]} array
+     */
+    send(array) {
         let result = ""
-        array.forEach(message =>{
+        array.forEach(message => {
             result += message
         })
         this.bot.sendMessage(this.channelId, result);
     }
 
+    /**
+     * @param {string} message
+     */
+    forceSend(message) {
+        this.bot.sendMessage(this.channelId, message);
+    }
 
 }
 

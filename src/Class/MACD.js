@@ -29,21 +29,21 @@ let MACD = class extends Endpoints {
 
             console.log("Vérification de " + symbols.length + " symboles");
             let counterVerified = 0;
-            let messagesToSend = [ [`🏛️ Vérification pour : ${frequency} 🏛️ \n\n `, null] ];
+            let messagesToSend = [[`🏛️ Vérification pour : ${frequency} 🏛️ \n\n `, null]];
             symbols.forEach((symbol) => {
                 this.request(this.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=" + frequency + "&limit=100", {json: true}, (err, res, body) => {
                     counterVerified++;
                     let {rsi, lastCandle, preLastCandle} = this.GetMacdValues(body);
 
                     let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
-                    if(result != null){
+                    if (result != null) {
                         messagesToSend.push(result);
                     }
-                    if (counterVerified === symbols.length) {
 
-                        if (messagesToSend.length === 1){
-                            this.bot.sendMessage(this.channelId, "Pas de croisement répéré en " + frequency);
-                        }else{
+                    if (counterVerified === symbols.length) {
+                        if (messagesToSend.length === 1) {
+                            new Message().forceSend("⚠Pas de croisement répéré en " + frequency + "⚠")
+                        } else {
                             new Message().sendMessage(messagesToSend)
                         }
 
