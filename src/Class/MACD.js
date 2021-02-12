@@ -90,7 +90,7 @@ let MACD = class extends Endpoints {
         return {rsi, lastCandle, preLastCandle}
     }
 
-    getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi){
+    getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi) {
         if (preLastCandle === undefined) {
             console.log("Ignore " + symbol + " pas assez d'histo");
             return "";
@@ -98,12 +98,12 @@ let MACD = class extends Endpoints {
             if (preLastCandle.histogram < 0) {
                 if (lastCandle.histogram > 0) {
                     console.log("Signal 📈 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
-                   return  "Signal 📈 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                    return "Signal 📈 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                 }
             } else {
                 if (lastCandle.histogram < 0) {
                     console.log("Signal 📉 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return  "Signal 📉 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                    return "Signal 📉 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                 }
             }
         }
