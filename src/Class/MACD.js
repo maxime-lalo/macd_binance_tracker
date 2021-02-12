@@ -47,7 +47,11 @@ let MACD = class extends Endpoints {
                     messagesToSend += this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
 
                     if (counterVerified === symbols.length) {
-                        this.bot.sendMessage(this.channelId, messagesToSend);
+                        if (messagesToSend == ""){
+                            this.bot.sendMessage(this.channelId, "Pas de croisement répéré en " + frequency);
+                        }else{
+                            this.bot.sendMessage(this.channelId, messagesToSend);
+                        }
                     }
                 });
             });
