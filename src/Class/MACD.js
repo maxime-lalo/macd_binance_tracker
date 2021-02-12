@@ -101,13 +101,13 @@ let MACD = class extends Endpoints {
         } else {
             if (preLastCandle.histogram < 0) {
                 if (lastCandle.histogram > 0) {
-                    console.log("Signal 📈 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return "Signal 📈 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                    console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                    return "Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                 }
             } else {
                 if (lastCandle.histogram < 0) {
-                    console.log("Signal 📉 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return "Signal 📉 [" + symbol + "] [" + frequency + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
+                    console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                    return "Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n";
                 }
             }
         }
