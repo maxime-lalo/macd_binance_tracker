@@ -40,12 +40,12 @@ let MACD = class extends Endpoints {
                         messagesToSend.push(result);
                     }
                     if (counterVerified === symbols.length) {
-                       new Message().sendMessage(messagesToSend)
-                      /*  if (messagesToSend == ""){
+
+                        if (messagesToSend.length === 1){
                             this.bot.sendMessage(this.channelId, "Pas de croisement répéré en " + frequency);
                         }else{
-                            this.bot.sendMessage(this.channelId, messagesToSend);
-                        }*/
+                            new Message().sendMessage(messagesToSend)
+                        }
 
                     }
                 });
@@ -108,10 +108,6 @@ let MACD = class extends Endpoints {
         }
         return null;
     }
-
-
-
-
 }
 
 
