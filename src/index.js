@@ -5,7 +5,8 @@ msg.initialize();
 var macdObj = new MACD();
 
 launchEverything();
-setInterval(launchEverything, (15 * 60 * 1000));
+// On vérifie tout toutes les 5mn
+setInterval(launchEverything, (5 * 60 * 1000));
 
 
 function launchEverything(){
