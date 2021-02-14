@@ -1,6 +1,7 @@
 let MACD = require('./Class/MACD');
 let Message = require('./Class/Message');
 let msg = new Message();
+msg.initialize();
 var macdObj = new MACD();
 
 // macdObj.verify('1d');
