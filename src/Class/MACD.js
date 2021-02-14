@@ -1,4 +1,4 @@
-let Endpoints = require('./AbsctractEnpoints')
+let Endpoints = require('./AbsctractEndpoints')
 let Message = require('./Message')
 
 let MACD = class extends Endpoints {
@@ -7,16 +7,18 @@ let MACD = class extends Endpoints {
     MACD;
     RSI;
     request;
+    messager;
 
     constructor() {
         super();
         this.MACD = require('technicalindicators').MACD;
         this.RSI = require('technicalindicators').RSI;
         this.request = require('request');
+        this.messager = new Message();
     }
 
 
-    verify(frequency) {
+    verify(frequency, callback) {
         console.log("Heure de vérification : " + new Date().getHours() + "h" + new Date().getMinutes());
         console.log("Vérification avec la fréquence : " + frequency);
 
@@ -29,7 +31,12 @@ let MACD = class extends Endpoints {
 
             console.log("Vérification de " + symbols.length + " symboles");
             let counterVerified = 0;
-            let messagesToSend = [[`🏛️ Vérification pour : ${frequency} 🏛️ \n\n `, null]];
+            
+            // Variables qui vont contenir les messages de signaux temporairement
+            let downMessages = [];
+            let upMessages = [];
+
+            // Pour chaque symbole
             symbols.forEach((symbol) => {
                 this.request(this.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=" + frequency + "&limit=100", {json: true}, (err, res, body) => {
                     counterVerified++;
@@ -37,14 +44,35 @@ let MACD = class extends Endpoints {
 
                     let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
                     if (result != null) {
-                        messagesToSend.push(result);
+                        // Si le signal est bull on le met dans le upMessages sinon dans le down
+                        if(result[1] == "up"){
+                            upMessages.push(result[0]);
+                        }else{
+                            downMessages.push(result[0]);
+                        }
                     }
 
+                    // Si on a vérifié tous les symbols, on envoie le message
                     if (counterVerified === symbols.length) {
-                        if (messagesToSend.length === 1) {
-                            new Message().forceSend("⚠Pas de croisement répéré en " + frequency + "⚠")
+                        if (upMessages.length === 0 && downMessages === 0) {
+                            this.messager.addPendingMsg("⚠Pas de croisement répéré en " + frequency + "⚠")
                         } else {
-                            new Message().sendMessage(messagesToSend)
+                            // On construit le message final trié avec les bull et les bear
+                            let finalMsg = "🏛️ Vérification pour : " + frequency + " 🏛️\n\n";
+
+                            for(var i =0; i < upMessages.length; i++){
+                                finalMsg += upMessages[i];
+                            }
+
+                            finalMsg += '\n';
+
+                            for (var i = 0; i < downMessages.length; i++) {
+                                finalMsg += downMessages[i];
+                            }
+
+                            // On l'ajoute aux pendingMessages
+                            this.messager.addPendingMsg(finalMsg);
+                            callback();
                         }
 
                     }
@@ -97,12 +125,12 @@ let MACD = class extends Endpoints {
             if (preLastCandle.histogram < 0) {
                 if (lastCandle.histogram > 0) {
                     console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n", "up"];
+                    return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "up"];
                 }
             } else {
                 if (lastCandle.histogram < 0) {
                     console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n\n", "down"];
+                    return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "down"];
                 }
             }
         }

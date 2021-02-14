@@ -1,17 +1,26 @@
 let MACD = require('./Class/MACD');
-new MACD().verify('1h');
-// Settimeout pour 1h
-setInterval(function () {
-    new MACD().verify('1h');
-}, (60 * 60 * 1000));
+let Message = require('./Class/Message');
+let msg = new Message();
+var macdObj = new MACD();
 
-// Settimeout pour 4h
-setInterval(function () {
-    new MACD().verify('4h');
-}, (4 * 60 * 60 * 1000));
+// macdObj.verify('1d');
+macdObj.verify('4h', function () {
+    macdObj.verify('1d', function () {
+        msg.sendPendingMsg();
+    });
+});
 
-// Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
+// Boucle pour checker les 4h et les 1d toutes les 15mn
 setInterval(function () {
-    new MACD().verify('1d');
-}, (30 * 60 * 1000));
+    macdObj.verify('4h', function() {
+        macdObj.verify('1d', function() {
+            msg.sendPendingMsg();
+        });
+    });
+}, (15 * 60 * 1000));
+
+// // Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
+// setInterval(function () {
+//     new MACD().verify('1d');
+// }, (30 * 60 * 1000));
 
