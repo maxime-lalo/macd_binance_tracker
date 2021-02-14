@@ -7,14 +7,14 @@ let Message = class {
     channelId;
 
     constructor() {
-        this.TelegramBot = require('node-telegram-bot-api');
-        this.options = require('../../token.json');
-        this.token = this.options.token;
-        this.channelId = this.options.channelId;
         this.fs = require('fs');
     }
 
     initialize(){
+        this.TelegramBot = require('node-telegram-bot-api');
+        this.options = require('../../token_tests.json');
+        this.token = this.options.token;
+        this.channelId = this.options.channelId;
         this.bot = new this.TelegramBot(this.token, { polling: true });
     }
     /**
@@ -75,6 +75,7 @@ let Message = class {
             // On réécrit le fichier de messages en vidant les messages
             parsedFile.messages = [];
             this.fs.writeFileSync(path.resolve(__dirname, '../files/messages.json'), JSON.stringify(parsedFile));
+            console.log("Messages envoyés");
         }else{
             console.log("Pas de messages à envoyer");
         }

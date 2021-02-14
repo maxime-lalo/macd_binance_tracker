@@ -1,3 +1,4 @@
+const { isBuffer } = require('util');
 let Endpoints = require('./AbsctractEndpoints')
 let Message = require('./Message')
 
@@ -8,13 +9,16 @@ let MACD = class extends Endpoints {
     RSI;
     request;
     messager;
-
+    fs;
+    path;
     constructor() {
         super();
         this.MACD = require('technicalindicators').MACD;
         this.RSI = require('technicalindicators').RSI;
         this.request = require('request');
         this.messager = new Message();
+        this.fs = require('fs');
+        this.path = require('path');
     }
 
 
@@ -54,11 +58,12 @@ let MACD = class extends Endpoints {
 
                     // Si on a vérifié tous les symbols, on envoie le message
                     if (counterVerified === symbols.length) {
-                        if (upMessages.length === 0 && downMessages === 0) {
+                        if (upMessages.length == 0 && downMessages == 0) {
                             this.messager.addPendingMsg("⚠Pas de croisement répéré en " + frequency + "⚠")
+                            console.log("⚠Pas de croisement répéré en " + frequency + "⚠");
                         } else {
                             // On construit le message final trié avec les bull et les bear
-                            let finalMsg = "🏛️ Vérification pour : " + frequency + " 🏛️\n\n";
+                            let finalMsg = "🏛️ Vérification pour : " + frequency + " 🏛️\n";
 
                             for(var i =0; i < upMessages.length; i++){
                                 finalMsg += upMessages[i];
@@ -72,9 +77,8 @@ let MACD = class extends Endpoints {
 
                             // On l'ajoute aux pendingMessages
                             this.messager.addPendingMsg(finalMsg);
-                            callback();
                         }
-
+                        callback();
                     }
                 });
             });
@@ -124,17 +128,103 @@ let MACD = class extends Endpoints {
         } else {
             if (preLastCandle.histogram < 0) {
                 if (lastCandle.histogram > 0) {
-                    console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "up"];
+                    if (this.writeSignal("down", symbol, frequency)){
+                        console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                        return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "up"];
+                    }else{
+                        console.log("Déjà envoyé 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                    }
                 }
             } else {
                 if (lastCandle.histogram < 0) {
-                    console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "down"];
+                    if (this.writeSignal("down", symbol, frequency)) {
+                        console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                        return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "down"];
+                    }else{
+                        console.log("Déjà envoyé 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                    }
                 }
             }
         }
         return null;
+    }
+
+    writeSignal(type,symbol,frequency){
+        var path = this.path.resolve(__dirname, '../files/last_signals.json');
+
+        if (this.fs.existsSync(path)){
+            var fileContent = this.fs.readFileSync(path);
+            var fileContent = JSON.parse(fileContent);
+            for(var i = 0; i < fileContent.signals.length; i++){
+                if (fileContent.signals[i].type == type && fileContent.signals[i].symbol == symbol){
+                    return false;
+                }
+            }
+        }else{
+            var fileContent = {"signals":[]} 
+        }
+
+        var now = parseInt((new Date().getTime())/1000);
+        
+        var nbr = frequency.substr(0,frequency.length-1);
+        var unity = frequency.slice(frequency.length - 1); 
+        switch (unity){
+            case "d":
+                var deleteTime = now + (nbr * 86400);
+                break;
+            case "h":
+                var deleteTime = now + (nbr * 3600);
+                break;
+            case "m":
+                var deleteTime = now + (nbr * 60);
+                break
+        }
+
+        fileContent.signals.push({
+            "type": type,
+            "symbol": symbol,
+            "timestamp": parseInt(new Date().getTime()/1000),
+            "frequency": frequency,
+            "deleteTime": deleteTime
+        });
+
+        this.fs.writeFileSync(path, JSON.stringify(fileContent));
+
+        return true;
+    }
+
+    clearSignals(){
+        var path = this.path.resolve(__dirname, '../files/last_signals.json');
+
+        if (this.fs.existsSync(path)) {
+            // On récupère le contenu du fichier
+            var fileContent = JSON.parse(this.fs.readFileSync(path));
+
+            // On récupère l'heure
+            var actualTime = parseInt(new Date().getTime()/1000);
+
+            // Tant qu'il y a quelque chose à supprimer
+            var removed = 1;
+            var toKeep = [];
+            for (var i = 0; i < fileContent.signals.length; i++) {
+                if (fileContent.signals[i].deleteTime < actualTime) {
+                    console.log("Signal " + fileContent.signals[i].symbol + " en " + fileContent.signals[i].frequency + " expiré ");
+                }else{
+                    toKeep.push(fileContent.signals[i]);
+                }
+            }
+
+            var finalSymbols = {"signals":[]};
+            for (var i = 0; i < toKeep.length; i++) {
+                for(var j = 0; j < fileContent.signals.length; j++){
+                    if(toKeep[i].symbol == fileContent.signals[j].symbol && toKeep[i].frequency == fileContent.signals[j].frequency){
+                        finalSymbols.signals.push(fileContent.signals[j]);
+                    }
+                }   
+            }
+
+            this.fs.writeFileSync(path, JSON.stringify(finalSymbols));
+        }
     }
 }
 

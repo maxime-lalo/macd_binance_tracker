@@ -4,22 +4,21 @@ let msg = new Message();
 msg.initialize();
 var macdObj = new MACD();
 
-// macdObj.verify('1d');
-macdObj.verify('4h', function () {
-    macdObj.verify('1d', function () {
-        msg.sendPendingMsg();
-    });
-});
+launchEverything();
+setInterval(launchEverything, (15 * 60 * 1000));
 
-// Boucle pour checker les 4h et les 1d toutes les 15mn
-setInterval(function () {
-    macdObj.verify('4h', function() {
-        macdObj.verify('1d', function() {
+
+function launchEverything(){
+    macdObj.verify('4h', function () {
+        macdObj.verify('1d', function () {
+            console.log("Fin des vérifs MACD \n------------\n");
             msg.sendPendingMsg();
+            console.log("Fin des envois des messages \n------------\n");
+            macdObj.clearSignals();
+            console.log("Fin des vérifs signaux déjà existants \n------------\n");
         });
     });
-}, (15 * 60 * 1000));
-
+}
 // // Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
 // setInterval(function () {
 //     new MACD().verify('1d');
