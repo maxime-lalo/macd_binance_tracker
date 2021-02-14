@@ -12,7 +12,7 @@ let Message = class {
 
     initialize(){
         this.TelegramBot = require('node-telegram-bot-api');
-        this.options = require('../../token_tests.json');
+        this.options = require('../../token.json');
         this.token = this.options.token;
         this.channelId = this.options.channelId;
         this.bot = new this.TelegramBot(this.token, { polling: true });
