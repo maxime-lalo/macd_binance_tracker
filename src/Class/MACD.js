@@ -1,3 +1,4 @@
+const { ifError } = require('assert');
 const { isBuffer } = require('util');
 let Endpoints = require('./AbsctractEndpoints')
 let Message = require('./Message')
@@ -88,8 +89,26 @@ let MACD = class extends Endpoints {
 
     getSymbols(request) {
         const symbols = [];
+
+        const stableCoins = [
+            "SUSD",
+            "BUSD",
+            "EUR",
+            "GBP",
+            "PAX",
+            "TUSD",
+            "USDC"
+        ]
+        
         for (let i = 0; i < request.symbols.length; i++) {
-            if (request.symbols[i].quoteAsset === 'USDT' && request.symbols[i].status === 'TRADING' && !request.symbols[i].baseAsset.includes('DOWN') && !request.symbols[i].baseAsset.includes('UP')) {
+            let found = 0;
+            for(let j = 0; j < stableCoins.length; j++){
+               if(request.symbols[i].baseAsset == stableCoins[j]){
+                   found = 1;
+               } 
+            }
+
+            if (request.symbols[i].quoteAsset === 'USDT' && request.symbols[i].status === 'TRADING' && !request.symbols[i].baseAsset.includes('DOWN') && !request.symbols[i].baseAsset.includes('UP') && found == 0) {
                 symbols.push(request.symbols[i].symbol);
             }
         }

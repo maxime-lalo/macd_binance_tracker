@@ -115,5 +115,8 @@ typings/
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 .idea
-token.json
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+token.json
+token_tests.json
+last_signals.json
