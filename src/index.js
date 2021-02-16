@@ -10,16 +10,14 @@ setInterval(launchEverything, (5 * 60 * 1000));
 
 
 function launchEverything(){
-    macdObj.verify('30m', function () {
-        macdObj.verify('1h', function () {
-            macdObj.verify('4h', function () {
-                macdObj.verify('1d', function () {
-                    console.log("Fin des vérifs MACD \n------------\n");
-                    msg.sendPendingMsg();
-                    console.log("Fin des envois des messages \n------------\n");
-                    macdObj.clearSignals();
-                    console.log("Fin des vérifs signaux déjà existants \n------------\n");
-                });
+    macdObj.verify('1h', function () {
+        macdObj.verify('4h', function () {
+            macdObj.verify('1d', function () {
+                console.log("Fin des vérifs MACD \n------------\n");
+                msg.sendPendingMsg();
+                console.log("Fin des envois des messages \n------------\n");
+                macdObj.clearSignals();
+                console.log("Fin des vérifs signaux déjà existants \n------------\n");
             });
         });
     });
