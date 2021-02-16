@@ -1,7 +1,8 @@
 const { ifError } = require('assert');
 const { isBuffer } = require('util');
-let Endpoints = require('./AbsctractEndpoints')
-let Message = require('./Message')
+let Endpoints = require('./AbsctractEndpoints');
+let Message = require('./Message');
+let DbManager = require ('./DbManager');
 
 let MACD = class extends Endpoints {
 
@@ -11,6 +12,7 @@ let MACD = class extends Endpoints {
     messager;
     fs;
     path;
+    dbManager;
     constructor() {
         super();
         this.MACD = require('technicalindicators').MACD;
@@ -19,6 +21,7 @@ let MACD = class extends Endpoints {
         this.messager = new Message();
         this.fs = require('fs');
         this.path = require('path');
+        this.dbManager = new DbManager();
     }
 
 
@@ -172,9 +175,49 @@ let MACD = class extends Endpoints {
     writeSignal(type,symbol,frequency){
 
         /**
-         * attention change pour lowdb
+         * On calcule à quelle heure il faudra supprimer le signal de la bdd
          */
         let deleteTime;
+
+        let now = parseInt((new Date().getTime()) / 1000);
+
+        let nbr = frequency.substr(0, frequency.length - 1);
+        let unity = frequency.slice(frequency.length - 1);
+        switch (unity) {
+            case "d":
+                deleteTime = now + (nbr * 86400);
+                break;
+            case "h":
+                deleteTime = now + (nbr * 3600);
+                break;
+            case "m":
+                deleteTime = now + (nbr * 60);
+                break
+        }
+        
+        let signal = {
+            "type": type,
+            "symbol": symbol,
+            "timestamp": parseInt(new Date().getTime() / 1000),
+            "frequency": frequency,
+            "deleteTime": deleteTime
+        }
+
+        // let signalsTable = this.dbManager.getDb().get('signals');
+        // let allSignals = signalsTable.value();
+
+        // /**
+        //  * On vient vérifier dans tous les signaux qu'on a stockés
+        //  * s'il existe déjà, si oui on renvoie false
+        //  */
+        // for(let i = 0; i < allSignals.length; i++){
+        //     if (allSignals[i].type === signal.type && allSignals[i].symbol === signal.symbol && allSignals[i].frequency === signal.frequency){
+        //         return false;
+        //     }
+        // }
+
+        // signalsTable.push(signal).write();
+
 
         /**
          * attention change pour lowdb ( définition de ça dans le construct ça n'a rien a faire ici )
@@ -192,29 +235,7 @@ let MACD = class extends Endpoints {
             }
         }
 
-        let now = parseInt((new Date().getTime())/1000);
-
-        let nbr = frequency.substr(0,frequency.length-1);
-        let unity = frequency.slice(frequency.length - 1);
-        switch (unity){
-            case "d":
-                deleteTime = now + (nbr * 86400);
-                break;
-            case "h":
-                deleteTime = now + (nbr * 3600);
-                break;
-            case "m":
-                deleteTime = now + (nbr * 60);
-                break
-        }
-
-        fileContent.signals.push({
-            "type": type,
-            "symbol": symbol,
-            "timestamp": parseInt(new Date().getTime()/1000),
-            "frequency": frequency,
-            "deleteTime": deleteTime
-        });
+        fileContent.signals.push(signal);
 
         this.fs.writeFileSync(path, JSON.stringify(fileContent));
 

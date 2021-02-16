@@ -119,5 +119,5 @@ typings/
 
 token.json
 token_tests.json
-last_signals.json
+src/files/last_signals.json
 db.json
