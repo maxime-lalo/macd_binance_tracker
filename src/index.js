@@ -2,7 +2,7 @@ let MACD = require('./Class/MACD');
 let Message = require('./Class/Message');
 let msg = new Message();
 msg.initialize();
-var macdObj = new MACD();
+let macdObj = new MACD();
 
 launchEverything();
 // On vérifie tout toutes les 5mn
@@ -24,8 +24,8 @@ function launchEverything(){
         });
     });
 }
-// // Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
-// setInterval(function () {
-//     new MACD().verify('1d');
-// }, (30 * 60 * 1000));
+// Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
+setInterval(function () {
+    new MACD().verify('1d');
+}, (30 * 60 * 1000));
 

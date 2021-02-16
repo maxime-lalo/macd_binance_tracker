@@ -1,22 +1,25 @@
+let DbManager = require('./DbManager')
+
 let Message = class {
-    fs;
     TelegramBot;
     options;
     token;
     bot;
     channelId;
+    dbManager;
 
     constructor() {
-        this.fs = require('fs');
+        this.dbManager = new DbManager();
     }
 
     initialize(){
         this.TelegramBot = require('node-telegram-bot-api');
-        this.options = require('../../token.json');
+        this.options = require('../../token_tests.json');
         this.token = this.options.token;
         this.channelId = this.options.channelId;
         this.bot = new this.TelegramBot(this.token, { polling: true });
     }
+
     /**
      * @param {*[]} array
      */
@@ -36,48 +39,31 @@ let Message = class {
     }
 
     /**
-     * @param {string} message 
+     * @param {string} msg 
      */
     addPendingMsg(msg){
-        const path = require('path');
-
-        // On récupère le fichier de messages
-        var file = this.fs.readFileSync(path.resolve(__dirname,'../files/messages.json'));
-        var parsedFile = JSON.parse(file);
-        
-        // On l'ajoute au fichier initial
-        parsedFile.messages.push(msg);
-
-        // On l'écrit dans le fichier
-        this.fs.writeFileSync(path.resolve(__dirname, '../files/messages.json'), JSON.stringify(parsedFile));
+        this.dbManager.getDb().get('messages').push(msg).write();
     }
 
     sendPendingMsg(){
-        const path = require('path');
+        // On récupère les messages en attente
+        let messages = this.dbManager.getDb().get('messages').value();
 
-        // On récupère le fichier de messages
-        var file = this.fs.readFileSync(path.resolve(__dirname, '../files/messages.json'));
-        var parsedFile = JSON.parse(file);
-
-        if(parsedFile.messages.length > 0){
-            var finalMessage = "";
-            // Pour chaque message on l'ajoute à finalMessage
-            for (var i = 0; i < parsedFile.messages.length; i++) {
-                finalMessage += parsedFile.messages[i]
-                if (i != (parsedFile.messages.length - 1)) {
-                    finalMessage += "\n------------------\n\n"
+        if (messages.length == 0){
+            console.log("Aucun message à envoyer");
+        }else{
+            // On créé le message final avec une ligne entre chaque message
+            let finalMsg = "";
+            for (let i = 0; i < messages.length; i++) {
+                finalMsg += messages[i];
+                // Si c'est le dernier message on ne met pas de ligne en dessous
+                if (i != (messages.length - 1)) {
+                    finalMsg += "\n------------------\n\n"
                 }
             }
 
-            // On envoie le message final
-            this.sendMessage(finalMessage);
-
-            // On réécrit le fichier de messages en vidant les messages
-            parsedFile.messages = [];
-            this.fs.writeFileSync(path.resolve(__dirname, '../files/messages.json'), JSON.stringify(parsedFile));
-            console.log("Messages envoyés");
-        }else{
-            console.log("Pas de messages à envoyer");
+            // On clear la table et on l'écrit
+            this.dbManager.getDb().get('messages').remove().write();
         }
     }
 }
