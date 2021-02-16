@@ -5,7 +5,6 @@ let Message = require('./Message')
 
 let MACD = class extends Endpoints {
 
-
     MACD;
     RSI;
     request;
@@ -36,7 +35,7 @@ let MACD = class extends Endpoints {
 
             console.log("Vérification de " + symbols.length + " symboles");
             let counterVerified = 0;
-            
+
             // Variables qui vont contenir les messages de signaux temporairement
             let downMessages = [];
             let upMessages = [];
@@ -50,7 +49,7 @@ let MACD = class extends Endpoints {
                     let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
                     if (result != null) {
                         // Si le signal est bull on le met dans le upMessages sinon dans le down
-                        if(result[1] == "up"){
+                        if(result[1] === "up"){
                             upMessages.push(result[0]);
                         }else{
                             downMessages.push(result[0]);
@@ -59,7 +58,7 @@ let MACD = class extends Endpoints {
 
                     // Si on a vérifié tous les symbols, on envoie le message
                     if (counterVerified === symbols.length) {
-                        if (upMessages.length == 0 && downMessages == 0) {
+                        if (upMessages.length === 0 && downMessages === 0) {
                             // Pas besoin d'envoyer un message s'il n'y a pas de croisement
                             //this.messager.addPendingMsg("⚠Pas de croisement répéré en " + frequency + "⚠")
                             console.log("⚠Pas de croisement répéré en " + frequency + "⚠");
@@ -100,13 +99,13 @@ let MACD = class extends Endpoints {
             "USDC",
             "AUD"
         ]
-        
+
         for (let i = 0; i < request.symbols.length; i++) {
             let found = 0;
             for(let j = 0; j < stableCoins.length; j++){
-               if(request.symbols[i].baseAsset == stableCoins[j]){
+               if(request.symbols[i].baseAsset === stableCoins[j]){
                    found = 1;
-               } 
+               }
             }
 
             if (request.symbols[i].quoteAsset === 'USDT' && request.symbols[i].status === 'TRADING' && !request.symbols[i].baseAsset.includes('DOWN') && !request.symbols[i].baseAsset.includes('UP') && found == 0) {
@@ -171,33 +170,42 @@ let MACD = class extends Endpoints {
     }
 
     writeSignal(type,symbol,frequency){
-        var path = this.path.resolve(__dirname, '../files/last_signals.json');
+
+        /**
+         * attention change pour lowdb
+         */
+        let deleteTime;
+
+        /**
+         * attention change pour lowdb ( définition de ça dans le construct ça n'a rien a faire ici )
+         */
+        let path = this.path.resolve(__dirname, '../files/last_signals.json');
 
         if (this.fs.existsSync(path)){
-            var fileContent = this.fs.readFileSync(path);
-            var fileContent = JSON.parse(fileContent);
-            for(var i = 0; i < fileContent.signals.length; i++){
-                if (fileContent.signals[i].type == type && fileContent.signals[i].symbol == symbol){
+            let fileContent = this.fs.readFileSync(path);
+            fileContent = JSON.parse(fileContent);
+            for(let i = 0; i < fileContent.signals.length; i++){
+                if (fileContent.signals[i].type === type && fileContent.signals[i].symbol === symbol){
                     return false;
                 }
             }
         }else{
-            var fileContent = {"signals":[]} 
+            let fileContent = {"signals":[]}
         }
 
-        var now = parseInt((new Date().getTime())/1000);
-        
-        var nbr = frequency.substr(0,frequency.length-1);
-        var unity = frequency.slice(frequency.length - 1); 
+        let now = parseInt((new Date().getTime())/1000);
+
+        let nbr = frequency.substr(0,frequency.length-1);
+        let unity = frequency.slice(frequency.length - 1);
         switch (unity){
             case "d":
-                var deleteTime = now + (nbr * 86400);
+                deleteTime = now + (nbr * 86400);
                 break;
             case "h":
-                var deleteTime = now + (nbr * 3600);
+                deleteTime = now + (nbr * 3600);
                 break;
             case "m":
-                var deleteTime = now + (nbr * 60);
+                deleteTime = now + (nbr * 60);
                 break
         }
 
@@ -215,35 +223,42 @@ let MACD = class extends Endpoints {
     }
 
     clearSignals(){
-        var path = this.path.resolve(__dirname, '../files/last_signals.json');
+        /**
+         * attention change pour lowdb
+         */
+        let path = this.path.resolve(__dirname, '../files/last_signals.json');
 
         if (this.fs.existsSync(path)) {
             // On récupère le contenu du fichier
-            var fileContent = JSON.parse(this.fs.readFileSync(path));
+            let fileContent = JSON.parse(this.fs.readFileSync(path));
 
             // On récupère l'heure
-            var actualTime = parseInt(new Date().getTime()/1000);
+            let actualTime = parseInt(new Date().getTime()/1000);
 
             // Tant qu'il y a quelque chose à supprimer
-            var removed = 1;
-            var toKeep = [];
-            for (var i = 0; i < fileContent.signals.length; i++) {
+            let removed = 1;
+            let toKeep = [];
+            for (let i = 0; i < fileContent.signals.length; i++) {
                 if (fileContent.signals[i].deleteTime < actualTime) {
                     console.log("Signal " + fileContent.signals[i].symbol + " en " + fileContent.signals[i].frequency + " expiré ");
                 }else{
                     toKeep.push(fileContent.signals[i]);
                 }
             }
-
-            var finalSymbols = {"signals":[]};
-            for (var i = 0; i < toKeep.length; i++) {
-                for(var j = 0; j < fileContent.signals.length; j++){
-                    if(toKeep[i].symbol == fileContent.signals[j].symbol && toKeep[i].frequency == fileContent.signals[j].frequency){
+            /**
+             * attention change pour lowdb !
+             */
+            let finalSymbols = {"signals":[]};
+            for (let i = 0; i < toKeep.length; i++) {
+                for(let j = 0; j < fileContent.signals.length; j++){
+                    if(toKeep[i].symbol === fileContent.signals[j].symbol && toKeep[i].frequency === fileContent.signals[j].frequency){
                         finalSymbols.signals.push(fileContent.signals[j]);
                     }
-                }   
+                }
             }
-
+            /**
+             * attention change pour lowdb
+             */
             this.fs.writeFileSync(path, JSON.stringify(finalSymbols));
         }
     }
