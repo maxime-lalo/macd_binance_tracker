@@ -10,7 +10,6 @@ setInterval(launchEverything, (5 * 60 * 1000));
 
 
 function launchEverything(){
-    macdObj.verify('30m', function () {
         macdObj.verify('1h', function () {
             macdObj.verify('4h', function () {
                 macdObj.verify('1d', function () {
@@ -22,7 +21,6 @@ function launchEverything(){
                 });
             });
         });
-    });
 }
 // // Settimeout pour 1d, pour les 1d on vérifie toutes les demies heures
 // setInterval(function () {
