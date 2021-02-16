@@ -14,7 +14,7 @@ let Message = class {
 
     initialize(){
         this.TelegramBot = require('node-telegram-bot-api');
-        this.options = require('../../token_tests.json');
+        this.options = require('../../token.json');
         this.token = this.options.token;
         this.channelId = this.options.channelId;
         this.bot = new this.TelegramBot(this.token, { polling: true });
@@ -61,6 +61,8 @@ let Message = class {
                     finalMsg += "\n------------------\n\n"
                 }
             }
+
+            this.sendMessage(finalMsg);
 
             // On clear la table et on l'écrit
             this.dbManager.getDb().get('messages').remove().write();

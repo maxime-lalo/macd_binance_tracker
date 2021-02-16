@@ -229,7 +229,7 @@ let MACD = class extends Endpoints {
             fileContent = this.fs.readFileSync(path);
             fileContent = JSON.parse(fileContent);
             for(let i = 0; i < fileContent.signals.length; i++){
-                if (fileContent.signals[i].type === type && fileContent.signals[i].symbol === symbol){
+                if (fileContent.signals[i].type === type && fileContent.signals[i].symbol === symbol && fileContent.signals[i].frequency === frequency){
                     return false;
                 }
             }
