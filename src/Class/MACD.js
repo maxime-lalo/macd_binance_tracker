@@ -58,7 +58,7 @@ let MACD = class extends Endpoints {
 
                     // Si on a vérifié tous les symbols, on envoie le message
                     if (counterVerified === symbols.length) {
-                        if (upMessages.length === 0 && downMessages === 0) {
+                        if (upMessages.length == 0 && downMessages == 0) {
                             // Pas besoin d'envoyer un message s'il n'y a pas de croisement
                             //this.messager.addPendingMsg("⚠Pas de croisement répéré en " + frequency + "⚠")
                             console.log("⚠Pas de croisement répéré en " + frequency + "⚠");
@@ -180,17 +180,16 @@ let MACD = class extends Endpoints {
          * attention change pour lowdb ( définition de ça dans le construct ça n'a rien a faire ici )
          */
         let path = this.path.resolve(__dirname, '../files/last_signals.json');
-
+        let fileContent = { "signals": [] }
+        
         if (this.fs.existsSync(path)){
-            let fileContent = this.fs.readFileSync(path);
+            fileContent = this.fs.readFileSync(path);
             fileContent = JSON.parse(fileContent);
             for(let i = 0; i < fileContent.signals.length; i++){
                 if (fileContent.signals[i].type === type && fileContent.signals[i].symbol === symbol){
                     return false;
                 }
             }
-        }else{
-            let fileContent = {"signals":[]}
         }
 
         let now = parseInt((new Date().getTime())/1000);
