@@ -97,7 +97,8 @@ let MACD = class extends Endpoints {
             "GBP",
             "PAX",
             "TUSD",
-            "USDC"
+            "USDC",
+            "AUD"
         ]
         
         for (let i = 0; i < request.symbols.length; i++) {
