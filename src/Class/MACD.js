@@ -36,7 +36,7 @@ let MACD = class extends Endpoints {
 
             console.log("Vérification de " + symbols.length + " symboles");
             let counterVerified = 0;
-            
+
             // Variables qui vont contenir les messages de signaux temporairement
             let downMessages = [];
             let upMessages = [];
@@ -99,13 +99,13 @@ let MACD = class extends Endpoints {
             "TUSD",
             "USDC"
         ]
-        
+
         for (let i = 0; i < request.symbols.length; i++) {
             let found = 0;
             for(let j = 0; j < stableCoins.length; j++){
                if(request.symbols[i].baseAsset == stableCoins[j]){
                    found = 1;
-               } 
+               }
             }
 
             if (request.symbols[i].quoteAsset === 'USDT' && request.symbols[i].status === 'TRADING' && !request.symbols[i].baseAsset.includes('DOWN') && !request.symbols[i].baseAsset.includes('UP') && found == 0) {
@@ -170,33 +170,34 @@ let MACD = class extends Endpoints {
     }
 
     writeSignal(type,symbol,frequency){
-        var path = this.path.resolve(__dirname, '../files/last_signals.json');
+        let deleteTime;
+        let path = this.path.resolve(__dirname, '../files/last_signals.json');
 
         if (this.fs.existsSync(path)){
-            var fileContent = this.fs.readFileSync(path);
-            var fileContent = JSON.parse(fileContent);
-            for(var i = 0; i < fileContent.signals.length; i++){
+            let fileContent = this.fs.readFileSync(path);
+            fileContent = JSON.parse(fileContent);
+            for(let i = 0; i < fileContent.signals.length; i++){
                 if (fileContent.signals[i].type == type && fileContent.signals[i].symbol == symbol){
                     return false;
                 }
             }
         }else{
-            var fileContent = {"signals":[]} 
+            let fileContent = {"signals":[]}
         }
 
-        var now = parseInt((new Date().getTime())/1000);
-        
-        var nbr = frequency.substr(0,frequency.length-1);
-        var unity = frequency.slice(frequency.length - 1); 
+        let now = parseInt((new Date().getTime())/1000);
+
+        let nbr = frequency.substr(0,frequency.length-1);
+        let unity = frequency.slice(frequency.length - 1);
         switch (unity){
             case "d":
-                var deleteTime = now + (nbr * 86400);
+                deleteTime = now + (nbr * 86400);
                 break;
             case "h":
-                var deleteTime = now + (nbr * 3600);
+                deleteTime = now + (nbr * 3600);
                 break;
             case "m":
-                var deleteTime = now + (nbr * 60);
+                deleteTime = now + (nbr * 60);
                 break
         }
 
@@ -240,7 +241,7 @@ let MACD = class extends Endpoints {
                     if(toKeep[i].symbol == fileContent.signals[j].symbol && toKeep[i].frequency == fileContent.signals[j].frequency){
                         finalSymbols.signals.push(fileContent.signals[j]);
                     }
-                }   
+                }
             }
 
             this.fs.writeFileSync(path, JSON.stringify(finalSymbols));
