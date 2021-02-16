@@ -49,7 +49,7 @@ let MACD = class extends Endpoints {
                     let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
                     if (result != null) {
                         // Si le signal est bull on le met dans le upMessages sinon dans le down
-                        if(result[1] == "up"){
+                        if(result[1] === "up"){
                             upMessages.push(result[0]);
                         }else{
                             downMessages.push(result[0]);
@@ -58,7 +58,7 @@ let MACD = class extends Endpoints {
 
                     // Si on a vérifié tous les symbols, on envoie le message
                     if (counterVerified === symbols.length) {
-                        if (upMessages.length == 0 && downMessages == 0) {
+                        if (upMessages.length === 0 && downMessages === 0) {
                             // Pas besoin d'envoyer un message s'il n'y a pas de croisement
                             //this.messager.addPendingMsg("⚠Pas de croisement répéré en " + frequency + "⚠")
                             console.log("⚠Pas de croisement répéré en " + frequency + "⚠");
@@ -169,7 +169,15 @@ let MACD = class extends Endpoints {
     }
 
     writeSignal(type,symbol,frequency){
+
+        /**
+         * attention change pour lowdb
+         */
         let deleteTime;
+
+        /**
+         * attention change pour lowdb ( définition de ça dans le construct ça n'a rien a faire ici )
+         */
         let path = this.path.resolve(__dirname, '../files/last_signals.json');
 
         if (this.fs.existsSync(path)){
@@ -214,6 +222,9 @@ let MACD = class extends Endpoints {
     }
 
     clearSignals(){
+        /**
+         * attention change pour lowdb
+         */
         let path = this.path.resolve(__dirname, '../files/last_signals.json');
 
         if (this.fs.existsSync(path)) {
@@ -233,7 +244,9 @@ let MACD = class extends Endpoints {
                     toKeep.push(fileContent.signals[i]);
                 }
             }
-
+            /**
+             * attention change pour lowdb !
+             */
             let finalSymbols = {"signals":[]};
             for (let i = 0; i < toKeep.length; i++) {
                 for(let j = 0; j < fileContent.signals.length; j++){
@@ -242,7 +255,9 @@ let MACD = class extends Endpoints {
                     }
                 }
             }
-
+            /**
+             * attention change pour lowdb
+             */
             this.fs.writeFileSync(path, JSON.stringify(finalSymbols));
         }
     }
