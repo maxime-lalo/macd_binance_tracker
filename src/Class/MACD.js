@@ -58,7 +58,7 @@ let MACD = class extends Endpoints {
 
                     // Si on a vérifié tous les symbols, on envoie le message
                     if (counterVerified === symbols.length) {
-                        if (upMessages.length == 0 && downMessages == 0) {
+                        if (upMessages.length === 0 && downMessages.length === 0) {
                             // Pas besoin d'envoyer un message s'il n'y a pas de croisement
                             //this.messager.addPendingMsg("⚠Pas de croisement répéré en " + frequency + "⚠")
                             console.log("⚠Pas de croisement répéré en " + frequency + "⚠");
