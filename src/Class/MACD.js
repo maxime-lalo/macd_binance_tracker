@@ -5,7 +5,6 @@ let Message = require('./Message')
 
 let MACD = class extends Endpoints {
 
-
     MACD;
     RSI;
     request;
@@ -103,7 +102,7 @@ let MACD = class extends Endpoints {
         for (let i = 0; i < request.symbols.length; i++) {
             let found = 0;
             for(let j = 0; j < stableCoins.length; j++){
-               if(request.symbols[i].baseAsset == stableCoins[j]){
+               if(request.symbols[i].baseAsset === stableCoins[j]){
                    found = 1;
                }
             }
@@ -177,7 +176,7 @@ let MACD = class extends Endpoints {
             let fileContent = this.fs.readFileSync(path);
             fileContent = JSON.parse(fileContent);
             for(let i = 0; i < fileContent.signals.length; i++){
-                if (fileContent.signals[i].type == type && fileContent.signals[i].symbol == symbol){
+                if (fileContent.signals[i].type === type && fileContent.signals[i].symbol === symbol){
                     return false;
                 }
             }
@@ -215,19 +214,19 @@ let MACD = class extends Endpoints {
     }
 
     clearSignals(){
-        var path = this.path.resolve(__dirname, '../files/last_signals.json');
+        let path = this.path.resolve(__dirname, '../files/last_signals.json');
 
         if (this.fs.existsSync(path)) {
             // On récupère le contenu du fichier
-            var fileContent = JSON.parse(this.fs.readFileSync(path));
+            let fileContent = JSON.parse(this.fs.readFileSync(path));
 
             // On récupère l'heure
-            var actualTime = parseInt(new Date().getTime()/1000);
+            let actualTime = parseInt(new Date().getTime()/1000);
 
             // Tant qu'il y a quelque chose à supprimer
-            var removed = 1;
-            var toKeep = [];
-            for (var i = 0; i < fileContent.signals.length; i++) {
+            let removed = 1;
+            let toKeep = [];
+            for (let i = 0; i < fileContent.signals.length; i++) {
                 if (fileContent.signals[i].deleteTime < actualTime) {
                     console.log("Signal " + fileContent.signals[i].symbol + " en " + fileContent.signals[i].frequency + " expiré ");
                 }else{
@@ -235,10 +234,10 @@ let MACD = class extends Endpoints {
                 }
             }
 
-            var finalSymbols = {"signals":[]};
-            for (var i = 0; i < toKeep.length; i++) {
-                for(var j = 0; j < fileContent.signals.length; j++){
-                    if(toKeep[i].symbol == fileContent.signals[j].symbol && toKeep[i].frequency == fileContent.signals[j].frequency){
+            let finalSymbols = {"signals":[]};
+            for (let i = 0; i < toKeep.length; i++) {
+                for(let j = 0; j < fileContent.signals.length; j++){
+                    if(toKeep[i].symbol === fileContent.signals[j].symbol && toKeep[i].frequency === fileContent.signals[j].frequency){
                         finalSymbols.signals.push(fileContent.signals[j]);
                     }
                 }
