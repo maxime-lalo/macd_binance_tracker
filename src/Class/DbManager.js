@@ -13,7 +13,7 @@ let DbManager = class {
         this.db = low(this.adapter);
 
         // On crée les tables dont on va avoir besoin
-        this.db.defaults({ messages: [] }).write()
+        this.db.defaults({ messages: [], value: [] }).write()
     }
 
     getDb(){
