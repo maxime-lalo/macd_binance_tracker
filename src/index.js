@@ -6,7 +6,7 @@ let macdObj = new MACD();
 
 launchEverything();
 // On vérifie tout toutes les 5mn
-setInterval(launchEverything, (30000));
+setInterval(launchEverything, (5 * 60 * 1000));
 
 function launchEverything(){
     macdObj.verify('1h', function () {
