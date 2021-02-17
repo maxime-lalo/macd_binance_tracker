@@ -1,8 +1,8 @@
-const { ifError } = require('assert');
-const { isBuffer } = require('util');
+const {ifError} = require('assert');
+const {isBuffer} = require('util');
 let Endpoints = require('./AbsctractEndpoints');
 let Message = require('./Message');
-let DbManager = require ('./DbManager');
+let DbManager = require('./DbManager');
 
 let MACD = class extends Endpoints {
 
@@ -13,6 +13,7 @@ let MACD = class extends Endpoints {
     fs;
     path;
     dbManager;
+
     constructor() {
         super();
         this.MACD = require('technicalindicators').MACD;
@@ -23,7 +24,6 @@ let MACD = class extends Endpoints {
         this.path = require('path');
         this.dbManager = new DbManager();
     }
-
 
     verify(frequency, callback) {
         console.log("Heure de vérification : " + new Date().getHours() + "h" + new Date().getMinutes());
@@ -36,7 +36,7 @@ let MACD = class extends Endpoints {
 
             const symbols = this.getSymbols(body)
 
-            console.log("Vérification de " + symbols.length + " symboles");
+            console.log("Verification de " + symbols.length + " symboles");
             let counterVerified = 0;
 
             // Variables qui vont contenir les messages de signaux temporairement
@@ -52,30 +52,30 @@ let MACD = class extends Endpoints {
                     let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
                     if (result != null) {
                         // Si le signal est bull on le met dans le upMessages sinon dans le down
-                        if(result[1] === "up"){
+                        if (result[1] === "up") {
                             upMessages.push(result[0]);
-                        }else{
+                        } else {
                             downMessages.push(result[0]);
                         }
                     }
+
 
                     // Si on a vérifié tous les symbols, on envoie le message
                     if (counterVerified === symbols.length) {
                         if (upMessages.length === 0 && downMessages.length === 0) {
                             // Pas besoin d'envoyer un message s'il n'y a pas de croisement
-                            //this.messager.addPendingMsg("⚠Pas de croisement répéré en " + frequency + "⚠")
                             console.log("⚠Pas de croisement répéré en " + frequency + "⚠");
                         } else {
                             // On construit le message final trié avec les bull et les bear
                             let finalMsg = "🏛️ Vérification pour : " + frequency + " 🏛️\n";
 
-                            for(var i =0; i < upMessages.length; i++){
+                            for (let i = 0; i < upMessages.length; i++) {
                                 finalMsg += upMessages[i];
                             }
 
                             finalMsg += '\n';
 
-                            for (var i = 0; i < downMessages.length; i++) {
+                            for (let i = 0; i < downMessages.length; i++) {
                                 finalMsg += downMessages[i];
                             }
 
@@ -105,10 +105,10 @@ let MACD = class extends Endpoints {
 
         for (let i = 0; i < request.symbols.length; i++) {
             let found = 0;
-            for(let j = 0; j < stableCoins.length; j++){
-               if(request.symbols[i].baseAsset === stableCoins[j]){
-                   found = 1;
-               }
+            for (let j = 0; j < stableCoins.length; j++) {
+                if (request.symbols[i].baseAsset === stableCoins[j]) {
+                    found = 1;
+                }
             }
 
             if (request.symbols[i].quoteAsset === 'USDT' && request.symbols[i].status === 'TRADING' && !request.symbols[i].baseAsset.includes('DOWN') && !request.symbols[i].baseAsset.includes('UP') && found == 0) {
@@ -151,138 +151,18 @@ let MACD = class extends Endpoints {
         } else {
             if (preLastCandle.histogram < 0) {
                 if (lastCandle.histogram > 0) {
-                    if (this.writeSignal("down", symbol, frequency)){
-                        console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                        return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "up"];
-                    }else{
-                        console.log("Déjà envoyé 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    }
+                    console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                    return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "up"];
                 }
             } else {
                 if (lastCandle.histogram < 0) {
-                    if (this.writeSignal("down", symbol, frequency)) {
-                        console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                        return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "down"];
-                    }else{
-                        console.log("Déjà envoyé 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
-                    }
+                    console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
+                    return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "down"];
                 }
             }
         }
         return null;
     }
-
-    writeSignal(type,symbol,frequency){
-
-        /**
-         * On calcule à quelle heure il faudra supprimer le signal de la bdd
-         */
-        let deleteTime;
-
-        let now = parseInt((new Date().getTime()) / 1000);
-
-        let nbr = frequency.substr(0, frequency.length - 1);
-        let unity = frequency.slice(frequency.length - 1);
-        switch (unity) {
-            case "d":
-                deleteTime = now + (nbr * 86400);
-                break;
-            case "h":
-                deleteTime = now + (nbr * 3600);
-                break;
-            case "m":
-                deleteTime = now + (nbr * 60);
-                break
-        }
-        
-        let signal = {
-            "type": type,
-            "symbol": symbol,
-            "timestamp": parseInt(new Date().getTime() / 1000),
-            "frequency": frequency,
-            "deleteTime": deleteTime
-        }
-
-        // let signalsTable = this.dbManager.getDb().get('signals');
-        // let allSignals = signalsTable.value();
-
-        // /**
-        //  * On vient vérifier dans tous les signaux qu'on a stockés
-        //  * s'il existe déjà, si oui on renvoie false
-        //  */
-        // for(let i = 0; i < allSignals.length; i++){
-        //     if (allSignals[i].type === signal.type && allSignals[i].symbol === signal.symbol && allSignals[i].frequency === signal.frequency){
-        //         return false;
-        //     }
-        // }
-
-        // signalsTable.push(signal).write();
-
-
-        /**
-         * attention change pour lowdb ( définition de ça dans le construct ça n'a rien a faire ici )
-         */
-        let path = this.path.resolve(__dirname, '../files/last_signals.json');
-        let fileContent = { "signals": [] }
-        
-        if (this.fs.existsSync(path)){
-            fileContent = this.fs.readFileSync(path);
-            fileContent = JSON.parse(fileContent);
-            for(let i = 0; i < fileContent.signals.length; i++){
-                if (fileContent.signals[i].type === type && fileContent.signals[i].symbol === symbol && fileContent.signals[i].frequency === frequency){
-                    return false;
-                }
-            }
-        }
-
-        fileContent.signals.push(signal);
-
-        this.fs.writeFileSync(path, JSON.stringify(fileContent));
-
-        return true;
-    }
-
-    clearSignals(){
-        /**
-         * attention change pour lowdb
-         */
-        let path = this.path.resolve(__dirname, '../files/last_signals.json');
-
-        if (this.fs.existsSync(path)) {
-            // On récupère le contenu du fichier
-            let fileContent = JSON.parse(this.fs.readFileSync(path));
-
-            // On récupère l'heure
-            let actualTime = parseInt(new Date().getTime()/1000);
-
-            // Tant qu'il y a quelque chose à supprimer
-            let removed = 1;
-            let toKeep = [];
-            for (let i = 0; i < fileContent.signals.length; i++) {
-                if (fileContent.signals[i].deleteTime < actualTime) {
-                    console.log("Signal " + fileContent.signals[i].symbol + " en " + fileContent.signals[i].frequency + " expiré ");
-                }else{
-                    toKeep.push(fileContent.signals[i]);
-                }
-            }
-            /**
-             * attention change pour lowdb !
-             */
-            let finalSymbols = {"signals":[]};
-            for (let i = 0; i < toKeep.length; i++) {
-                for(let j = 0; j < fileContent.signals.length; j++){
-                    if(toKeep[i].symbol === fileContent.signals[j].symbol && toKeep[i].frequency === fileContent.signals[j].frequency){
-                        finalSymbols.signals.push(fileContent.signals[j]);
-                    }
-                }
-            }
-            /**
-             * attention change pour lowdb
-             */
-            this.fs.writeFileSync(path, JSON.stringify(finalSymbols));
-        }
-    }
 }
-
 
 module.exports = MACD;

@@ -6,7 +6,8 @@ let macdObj = new MACD();
 
 launchEverything();
 // On vérifie tout toutes les 5mn
-setInterval(launchEverything, (5 * 60 * 1000));
+setInterval(launchEverything, (30000));
+
 function launchEverything(){
     macdObj.verify('1h', function () {
         macdObj.verify('4h', function () {
@@ -14,7 +15,6 @@ function launchEverything(){
                 console.log("Fin des vérifs MACD \n------------\n");
                 msg.sendPendingMsg();
                 console.log("Fin des envois des messages \n------------\n");
-                macdObj.clearSignals();
                 console.log("Fin des vérifs signaux déjà existants \n------------\n");
             });
         });

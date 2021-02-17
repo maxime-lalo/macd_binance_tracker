@@ -21,17 +21,6 @@ let Message = class {
     }
 
     /**
-     * @param {*[]} array
-     */
-    send(array) {
-        let result = ""
-        array.forEach(message => {
-            result += message
-        })
-        this.bot.sendMessage(this.channelId, result);
-    }
-
-    /**
      * @param {string} message
      */
     sendMessage(message) {
@@ -39,7 +28,7 @@ let Message = class {
     }
 
     /**
-     * @param {string} msg 
+     * @param {string} msg
      */
     addPendingMsg(msg){
         this.dbManager.getDb().get('messages').push(msg).write();
@@ -47,7 +36,10 @@ let Message = class {
 
     sendPendingMsg(){
         // On récupère les messages en attente
+
         let messages = this.dbManager.getDb().get('messages').value();
+
+        console.log(messages);
 
         if (messages.length == 0){
             console.log("Aucun message à envoyer");
@@ -57,7 +49,7 @@ let Message = class {
             for (let i = 0; i < messages.length; i++) {
                 finalMsg += messages[i];
                 // Si c'est le dernier message on ne met pas de ligne en dessous
-                if (i != (messages.length - 1)) {
+                if (i !== (messages.length - 1)) {
                     finalMsg += "\n------------------\n\n"
                 }
             }
