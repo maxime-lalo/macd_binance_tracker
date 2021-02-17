@@ -3,6 +3,7 @@ const {isBuffer} = require('util');
 let Endpoints = require('./AbsctractEndpoints');
 let Message = require('./Message');
 let DbManager = require('./DbManager');
+let value = require('./Value');
 
 let MACD = class extends Endpoints {
 
@@ -13,6 +14,8 @@ let MACD = class extends Endpoints {
     fs;
     path;
     dbManager;
+    ms;
+    value;
 
     constructor() {
         super();
@@ -23,12 +26,12 @@ let MACD = class extends Endpoints {
         this.fs = require('fs');
         this.path = require('path');
         this.dbManager = new DbManager();
+        this.ms = require('ms');
+        this.value = new value();
+        this.uuid = require('uuid')
     }
 
     verify(frequency, callback) {
-        console.log("Heure de vérification : " + new Date().getHours() + "h" + new Date().getMinutes());
-        console.log("Vérification avec la fréquence : " + frequency);
-
         this.request(this.endpointBinanceExchange, {json: true}, (err, res, body) => {
             if (err) {
                 return console.log(err);
@@ -36,7 +39,6 @@ let MACD = class extends Endpoints {
 
             const symbols = this.getSymbols(body)
 
-            console.log("Verification de " + symbols.length + " symboles");
             let counterVerified = 0;
 
             // Variables qui vont contenir les messages de signaux temporairement
@@ -52,11 +54,21 @@ let MACD = class extends Endpoints {
                     let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
                     if (result != null) {
                         // Si le signal est bull on le met dans le upMessages sinon dans le down
-                        if (result[1] === "up") {
-                            upMessages.push(result[0]);
-                        } else {
-                            downMessages.push(result[0]);
+                        let value = {
+                            uuid: this.uuid.v4(),
+                            symbol: symbol,
+                            frequency: frequency,
+                            time: new Date().getTime() + this.ms(frequency)
+                        };
+
+                        if (this.value.checkValue(value)) {
+                            if (result[1] === "up") {
+                                upMessages.push(result[0]);
+                            } else {
+                                downMessages.push(result[0]);
+                            }
                         }
+
                     }
 
 
@@ -64,7 +76,6 @@ let MACD = class extends Endpoints {
                     if (counterVerified === symbols.length) {
                         if (upMessages.length === 0 && downMessages.length === 0) {
                             // Pas besoin d'envoyer un message s'il n'y a pas de croisement
-                            console.log("⚠Pas de croisement répéré en " + frequency + "⚠");
                         } else {
                             // On construit le message final trié avec les bull et les bear
                             let finalMsg = "🏛️ Vérification pour : " + frequency + " 🏛️\n";
@@ -146,17 +157,14 @@ let MACD = class extends Endpoints {
 
     getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi) {
         if (preLastCandle === undefined) {
-            console.log("Ignore " + symbol + " pas assez d'histo");
             return null;
         } else {
             if (preLastCandle.histogram < 0) {
                 if (lastCandle.histogram > 0) {
-                    console.log("Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
                     return ["Signal 📈 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "up"];
                 }
             } else {
                 if (lastCandle.histogram < 0) {
-                    console.log("Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]");
                     return ["Signal 📉 [" + symbol + "] [RSI " + rsi[rsi.length - 1] + "]\n", "down"];
                 }
             }

@@ -39,9 +39,7 @@ let Message = class {
 
         let messages = this.dbManager.getDb().get('messages').value();
 
-        console.log(messages);
-
-        if (messages.length == 0){
+        if (messages.length === 0){
             console.log("Aucun message à envoyer");
         }else{
             // On créé le message final avec une ligne entre chaque message
