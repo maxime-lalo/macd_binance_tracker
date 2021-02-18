@@ -4,6 +4,7 @@ let Endpoints = require('./AbsctractEndpoints');
 let Message = require('./Message');
 let DbManager = require('./DbManager');
 let value = require('./Value');
+let Simulation = require('./Simulation');
 
 let MACD = class extends Endpoints {
 
@@ -29,6 +30,7 @@ let MACD = class extends Endpoints {
         this.ms = require('ms');
         this.value = new value();
         this.uuid = require('uuid')
+        this.simulation = new Simulation();
     }
 
     verify(frequency, callback) {
@@ -50,7 +52,6 @@ let MACD = class extends Endpoints {
                 this.request(this.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=" + frequency + "&limit=100", {json: true}, (err, res, body) => {
                     counterVerified++;
                     let {rsi, lastCandle, preLastCandle} = this.GetMacdValues(body);
-
                     let result = this.getCrossMacd(preLastCandle, lastCandle, symbol, frequency, rsi)
                     if (result != null) {
                         // Si le signal est bull on le met dans le upMessages sinon dans le down
@@ -62,6 +63,19 @@ let MACD = class extends Endpoints {
                         };
 
                         if (this.value.checkValue(value)) {
+
+                            // On créé une simulation de trade
+                            this.simulation.createTrade({
+                                symbol: symbol,
+                                frequency: frequency,
+                                time: new Date().getTime(),
+                                price: body[body.length-1][4],
+                                firstCheck: null,
+                                secondCheck: null,
+                                lastCheck: null,
+                                benefits: null
+                            })
+                            
                             if (result[1] === "up") {
                                 upMessages.push(result[0]);
                             } else {
