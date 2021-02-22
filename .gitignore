@@ -120,4 +120,4 @@ typings/
 token.json
 token_tests.json
 src/files/last_signals.json
-db.json
+*.json
