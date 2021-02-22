@@ -7,12 +7,14 @@ const DbManager = require('../src/Class/DbManager');
 let db = new DbManager();
 msg.initialize();
 let macdObj = new MACD();
+let io = require('@pm2/io')
+
 
 launchEverything();
 // On vérifie tout toutes les 5mn
 setInterval(launchEverything, (5 * 60 * 1000));
 
-var valvar = io.metric({
+let valvar = io.metric({
     name    : 'Realtime Value'
 })
 
@@ -28,10 +30,6 @@ function launchEverything(){
         });
     });
 }
-
-var valvar = io.metric({
-    name    : 'Realtime Value'
-})
 
 valvar.set(getResult());
 
