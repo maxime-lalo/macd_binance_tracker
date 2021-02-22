@@ -22,4 +22,4 @@ function getResult(){
     return [up[1],down[1]]
 }
 
-module.exports = getResult()
+module.exports = getResult
