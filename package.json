@@ -4,8 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "dev": "node src/index.js",
-    "stats": "node ./Commands/Commands.js src/Stats"
+    "dev": "node src/index.js"
   },
   "author": "",
   "license": "ISC",
