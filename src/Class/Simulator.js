@@ -1,10 +1,12 @@
 let Endpoints = require('./AbsctractEndpoints');
 let DbManager = require('./DbManager');
+const ms = require("ms");
 
 let Simulator = class extends Endpoints {
     request;
     db;
     uuid;
+
     constructor() {
         super();
         this.request = require('request');
@@ -26,18 +28,17 @@ let Simulator = class extends Endpoints {
 
         let data = this;
 
-       let interval = setInterval(function(){
+        let interval = setInterval(function () {
+            data.request(data.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=1m&limit=100", {json: true}, (err, res, body) => {
 
-           data.request( data.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=1m&limit=100", { json: true }, (err, res, body) => {
-
-               data.db.getSimulatorDb().get('Simulation')
-                   .find({ uuid: uuid })
-                   .assign({final : body[body.length - 1 ][4]})
-                   .write()
-           });
+                data.db.getSimulatorDb().get('Simulation')
+                    .find({uuid: uuid})
+                    .assign({final: body[body.length - 1][4]})
+                    .write()
+            });
 
             clearInterval(interval);
-        }, frequency * 3)
+        }, ms(frequency) * 3)
 
     }
 
