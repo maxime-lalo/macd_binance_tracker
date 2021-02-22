@@ -1,3 +1,6 @@
+const DbManager = require('../Class/DbManager');
+let db = new DbManager();
+
 function getResult(){
 
     let data =  db.getSimulatorDb().get('Simulation').value();

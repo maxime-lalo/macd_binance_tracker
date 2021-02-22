@@ -3,8 +3,7 @@ let Message = require('./Class/Message');
 let value = require('./Class/Value');
 let vl = new value();
 let msg = new Message();
-const DbManager = require('../src/Class/DbManager');
-let db = new DbManager();
+
 msg.initialize();
 let macdObj = new MACD();
 let io = require('@pm2/io')
