@@ -29,14 +29,12 @@ function launchEverything(){
             macdObj.verify('1d', function () {
                 msg.sendPendingMsg();
                 vl.deleteExpired();
-                valvar.set(23)
+                up.set(getResult()[0]);
+                down.set(getResult()[1]);
             });
         });
     });
 }
-
-up.set(getResult()[0]);
-down.set(getResult()[1]);
 
 function getResult(){
 
