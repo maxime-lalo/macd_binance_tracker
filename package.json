@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@pm2/io": "^4.3.5",
     "cli-table": "^0.3.5",
     "commander": "^7.1.0",
     "lowdb": "^1.0.0",

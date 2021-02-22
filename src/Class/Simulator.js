@@ -39,10 +39,7 @@ let Simulator = class extends Endpoints {
 
             clearInterval(interval);
         }, ms(frequency) * 3)
-
     }
-
-
 }
 
 
