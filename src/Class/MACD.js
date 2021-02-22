@@ -4,6 +4,8 @@ let Endpoints = require('./AbsctractEndpoints');
 let Message = require('./Message');
 let DbManager = require('./DbManager');
 let value = require('./Value');
+let Simulate = require('./Simulator');
+
 
 let MACD = class extends Endpoints {
 
@@ -16,6 +18,7 @@ let MACD = class extends Endpoints {
     dbManager;
     ms;
     value;
+    Simulator;
 
     constructor() {
         super();
@@ -29,6 +32,7 @@ let MACD = class extends Endpoints {
         this.ms = require('ms');
         this.value = new value();
         this.uuid = require('uuid')
+        this.Simulator = new Simulate;
     }
 
     verify(frequency, callback) {
@@ -47,6 +51,7 @@ let MACD = class extends Endpoints {
 
             // Pour chaque symbole
             symbols.forEach((symbol) => {
+
                 this.request(this.endpointBinance + "/api/v3/klines?symbol=" + symbol + "&interval=" + frequency + "&limit=100", {json: true}, (err, res, body) => {
                     counterVerified++;
                     let {rsi, lastCandle, preLastCandle} = this.GetMacdValues(body);
@@ -62,6 +67,7 @@ let MACD = class extends Endpoints {
                         };
 
                         if (this.value.checkValue(value)) {
+                            this.Simulator.SimulateData(symbol, frequency , body[body.length - 1 ][4],result[1]);
                             if (result[1] === "up") {
                                 upMessages.push(result[0]);
                             } else {
