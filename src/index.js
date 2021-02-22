@@ -14,8 +14,12 @@ launchEverything();
 // On vérifie tout toutes les 5mn
 setInterval(launchEverything, (5 * 60 * 1000));
 
-let valvar = io.metric({
-    name    : 'Realtime Value'
+let up = io.metric({
+    name    : 'Up win %'
+})
+
+let down = io.metric({
+    name    : 'Down win %'
 })
 
 
@@ -31,7 +35,8 @@ function launchEverything(){
     });
 }
 
-valvar.set(getResult());
+up.set(getResult()[0]);
+down.set(getResult()[1]);
 
 function getResult(){
 
@@ -51,6 +56,6 @@ function getResult(){
             up[1] += (( symbol.starting - symbol.final ) / symbol.starting) * 100;
         }
     })
-    return up[1];
+    return [up[1],down[1]]
 }
 
