@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "node src/index.js",
-    "stats": "node ./Commands/Commands.js Stats"
+    "stats": "node ./Commands/Commands.js src/Stats"
   },
   "author": "",
   "license": "ISC",

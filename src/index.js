@@ -8,6 +8,7 @@ let db = new DbManager();
 msg.initialize();
 let macdObj = new MACD();
 let io = require('@pm2/io')
+let getResult = require('./Stats/Up-Down');
 
 
 launchEverything();
@@ -36,24 +37,5 @@ function launchEverything(){
     });
 }
 
-function getResult(){
 
-    let data =  db.getSimulatorDb().get('Simulation').value();
-    let up = [
-        "UP",
-        0
-    ];
-    let down = [
-        "DOWN",
-        0
-    ];
-    data.forEach(symbol => {
-        if(symbol.type === "down"){
-            down[1] += ( (( symbol.starting - symbol.final ) / symbol.starting) *100)* -1 ;
-        }else{
-            up[1] += (( symbol.starting - symbol.final ) / symbol.starting) * 100;
-        }
-    })
-    return [up[1],down[1]]
-}
 
